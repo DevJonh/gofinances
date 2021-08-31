@@ -5,9 +5,9 @@ export default {
     secondary_ligth: "rgba(255,135,44,.3)",
 
     success: "#12a454",
-    success_ligth: "rgba(18,164,84,.5)",
+    success_ligth: "rgba(18,164,84,.15)",
     attention: "#e83f5b",
-    attention_ligth: "rgba(232,63,91,.5)",
+    attention_ligth: "rgba(232,63,91,.15)",
 
     shape: "#ffffff",
     title: "#363f5f",
