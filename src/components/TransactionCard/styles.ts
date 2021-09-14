@@ -3,7 +3,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import styled from "styled-components/native";
 
 interface TransactionsProps {
-  type: "positive" | "negative";
+  type: "up" | "down";
 }
 
 export const Container = styled.View`
@@ -23,7 +23,7 @@ export const Amount = styled.Text<TransactionsProps>`
   font-size: ${RFValue(20)}px;
   font-family: ${({ theme }) => theme.fonts.regular};
   color: ${({ theme, type }) =>
-    type === "positive" ? theme.colors.success : theme.colors.attention};
+    type === "up" ? theme.colors.success : theme.colors.attention};
   margin-top: 2px;
 `;
 export const Footer = styled.View`

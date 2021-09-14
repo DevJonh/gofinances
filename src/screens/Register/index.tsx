@@ -7,7 +7,7 @@ import { Button } from "../../components/Forms/Button";
 import { CategorySelectButton } from "../../components/Forms/CategorySelectButton";
 import { InputForm } from "../../components/Forms/InputForm";
 import { TransactionTypeButton } from "../../components/Forms/TransactionTypeButton";
-
+import uuid from "uuid";
 import { CategorySelect } from "../../screens/CategorySelect";
 
 import {
@@ -18,10 +18,16 @@ import {
   Fields,
   TransactionsType,
 } from "./styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
 interface FormData {
   name: string;
   amount: string;
+}
+
+interface RoutesProps {
+  route: "Listagem" | "Resumo" | "Cadastrar";
 }
 
 const schema = Yup.object().shape({
@@ -40,8 +46,11 @@ export const Register = () => {
   const [transactionType, setTransactionType] = useState("up");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
+  const navigation = useNavigation();
+
   const {
     control,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
@@ -57,19 +66,40 @@ export const Register = () => {
     setCategoryModalOpen(true);
   };
 
-  const handleRegister = (form: FormData) => {
+  const handleRegister = async (form: FormData) => {
     if (category.key === "category") {
       return Alert.alert("Selecione a categoria");
     }
 
-    const data = {
+    const newTransaction = {
+      id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
       category: category.key,
       transactionType,
+      date: new Date(),
     };
 
-    console.log(data);
+    try {
+      const dataKey = "@gofinances:transactions";
+      const transaction = await AsyncStorage.getItem(dataKey);
+      const currentTransaction = transaction ? JSON.parse(transaction) : [];
+
+      const dataFormated = [...currentTransaction, newTransaction];
+
+      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormated));
+      reset();
+      setTransactionType("up");
+      setCategory({
+        key: "category",
+        name: "Categoria",
+      });
+
+      navigation.navigate("Listagem");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Não foi possível salvar");
+    }
   };
 
   return (
