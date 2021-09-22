@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Alert, Keyboard, Modal, TouchableWithoutFeedback } from "react-native";
+
 import { Button } from "../../components/Forms/Button";
 import { CategorySelectButton } from "../../components/Forms/CategorySelectButton";
 import { InputForm } from "../../components/Forms/InputForm";
@@ -18,16 +21,10 @@ import {
   Fields,
   TransactionsType,
 } from "./styles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
 
 interface FormData {
   name: string;
   amount: string;
-}
-
-interface RoutesProps {
-  route: "Listagem" | "Resumo" | "Cadastrar";
 }
 
 const schema = Yup.object().shape({
@@ -46,7 +43,7 @@ export const Register = () => {
   const [transactionType, setTransactionType] = useState("up");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
-  const navigation = useNavigation();
+  const { dispatch } = useNavigation();
 
   const {
     control,
@@ -76,7 +73,7 @@ export const Register = () => {
       name: form.name,
       amount: form.amount,
       category: category.key,
-      transactionType,
+      type: transactionType,
       date: new Date(),
     };
 
@@ -95,7 +92,11 @@ export const Register = () => {
         name: "Categoria",
       });
 
-      navigation.navigate("Listagem");
+      dispatch(
+        CommonActions.navigate({
+          name: "Listagem",
+        })
+      );
     } catch (error) {
       console.log(error);
       Alert.alert("Não foi possível salvar");
