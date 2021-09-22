@@ -39,7 +39,6 @@ export const Resume = () => {
   const theme = useTheme();
 
   const handleDateChange = (action: "next" | "back") => {
-    setIsLoading(true);
     if (action === "next") {
       setSelectedDate(addMonths(selectedDate, 1));
     } else {
@@ -48,6 +47,7 @@ export const Resume = () => {
   };
 
   const loadData = async () => {
+    setIsLoading(true);
     const dataKey = "@gofinances:transactions";
     const response = await AsyncStorage.getItem(dataKey);
     const transactions = response ? JSON.parse(response) : [];
