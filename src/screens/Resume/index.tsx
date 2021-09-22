@@ -33,7 +33,7 @@ interface CategoryData {
 }
 
 export const Resume = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<CategoryData[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const theme = useTheme();
