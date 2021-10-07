@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { memo, useState, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native";
 import { useTheme } from "styled-components";
@@ -24,7 +24,9 @@ import {
   TransactionsList,
   LogoutButton,
   LoadContainer,
+  Info,
 } from "./styles";
+import { useAuth } from "../../hooks/auth";
 
 export interface DataListProps extends TransactionCardProps {
   id: string;
@@ -41,8 +43,9 @@ interface HighlightCard {
   total: HighlightProps;
 }
 
-export const Dashboard = () => {
-  const dataKey = "@gofinances:transactions";
+export const Dashboard = memo(() => {
+  const { signOut, user } = useAuth();
+  const dataKey = `@gofinances:transactions_user:${user.id}`;
   const [transactions, setTransactions] = useState<DataListProps[]>([]);
   const [highlightData, setHighlightData] = useState<HighlightCard>(
     {} as HighlightCard
@@ -110,6 +113,7 @@ export const Dashboard = () => {
       transactions,
       "down"
     );
+
     const totalInterval = `01 até ${lastTransactionsExpenses}`;
 
     setHighlightData({
@@ -118,21 +122,27 @@ export const Dashboard = () => {
           style: "currency",
           currency: "BRL",
         }).format(expenseTotal),
-        lastTransaction: `Última saída de ${lastTransactionsExpenses}`,
+        lastTransaction: lastTransactionsExpenses.includes("NaN")
+          ? "Nenhuma saída realizada"
+          : `Última saída de ${lastTransactionsExpenses}`,
       },
       entries: {
         amount: new Intl.NumberFormat("pt-BR", {
           style: "currency",
           currency: "BRL",
         }).format(entriesTotal),
-        lastTransaction: `Última entrada de ${lastTransactionsEntries}`,
+        lastTransaction: lastTransactionsEntries.includes("NaN")
+          ? "Nenhuma entrada realizada"
+          : `Última entrada de ${lastTransactionsEntries}`,
       },
       total: {
         amount: new Intl.NumberFormat("pt-BR", {
           style: "currency",
           currency: "BRL",
         }).format(entriesTotal - expenseTotal),
-        lastTransaction: totalInterval,
+        lastTransaction: lastTransactionsExpenses.includes("NaN")
+          ? ""
+          : totalInterval,
       },
     });
 
@@ -158,16 +168,16 @@ export const Dashboard = () => {
               <UserInfo>
                 <Photo
                   source={{
-                    uri: "https://avatars.githubusercontent.com/u/53903172?v=4",
+                    uri: user.photo,
                   }}
                 />
 
                 <User>
                   <UserGretting>Olá,</UserGretting>
-                  <UserName>Jônatas</UserName>
+                  <UserName>{user.name}</UserName>
                 </User>
               </UserInfo>
-              <LogoutButton onPress={() => {}}>
+              <LogoutButton onPress={signOut}>
                 <Icon name="power" />
               </LogoutButton>
             </UserWrapper>
@@ -194,16 +204,21 @@ export const Dashboard = () => {
           </HighlightCards>
 
           <Transactions>
-            <Title>Listagem</Title>
-
-            <TransactionsList
-              data={transactions}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => <TransactionCard data={item} />}
-            />
+            {transactions.length > 0 ? (
+              <>
+                <Title>Listagem</Title>
+                <TransactionsList
+                  data={transactions}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => <TransactionCard data={item} />}
+                />
+              </>
+            ) : (
+              <Info>Nenhuma transação a ser exibida</Info>
+            )}
           </Transactions>
         </>
       )}
     </Container>
   );
-};
+});

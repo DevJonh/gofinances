@@ -16,6 +16,8 @@ import {
   SelectIcon,
   Month,
   LoadContainer,
+  Info,
+  InfoContainer,
 } from "./styles";
 import { DataListProps } from "../Dashboard";
 import { categories } from "../../utils/categories";
@@ -23,6 +25,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { ptBR } from "date-fns/locale";
 import { ActivityIndicator } from "react-native";
 import { useFocusEffect } from "@react-navigation/core";
+import { useAuth } from "../../hooks/auth";
 
 interface CategoryData {
   name: string;
@@ -33,6 +36,7 @@ interface CategoryData {
 }
 
 export const Resume = () => {
+  const { signOut, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<CategoryData[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -48,7 +52,8 @@ export const Resume = () => {
 
   const loadData = async () => {
     setIsLoading(true);
-    const dataKey = "@gofinances:transactions";
+
+    const dataKey = `@gofinances:transactions_user:${user.id}`;
     const response = await AsyncStorage.getItem(dataKey);
     const transactions = response ? JSON.parse(response) : [];
 
@@ -133,31 +138,40 @@ export const Resume = () => {
               <SelectIcon name="chevron-right" />
             </MonthSelectButtom>
           </MonthSelect>
-          <ChartContainer>
-            <VictoryPie
-              data={data}
-              x="percent"
-              y="total"
-              colorScale={data.map((category) => category.color)}
-              style={{
-                labels: {
-                  fontSize: RFValue(18),
-                  fontWeight: "bold",
-                  fill: theme.colors.shape,
-                },
-              }}
-              labelRadius={55}
-            />
-          </ChartContainer>
+          {data.length > 0 ? (
+            <>
+              <ChartContainer>
+                <VictoryPie
+                  data={data}
+                  x="percent"
+                  y="total"
+                  colorScale={data.map((category) => category.color)}
+                  style={{
+                    labels: {
+                      fontSize: RFValue(18),
+                      fontWeight: "bold",
+                      fill: theme.colors.shape,
+                    },
+                  }}
+                  labelRadius={55}
+                />
+              </ChartContainer>
 
-          {data.map((item) => (
-            <HistoryCard
-              key={item.name}
-              title={item.name}
-              amount={item.totalFormatted}
-              color={item.color}
-            />
-          ))}
+              {data.map((item) => (
+                <HistoryCard
+                  key={item.name}
+                  title={item.name}
+                  amount={item.totalFormatted}
+                  color={item.color}
+                />
+              ))}
+            </>
+          ) : (
+            <InfoContainer>
+              <Info>Nenhuma transação</Info>
+              <Info>a ser exibida</Info>
+            </InfoContainer>
+          )}
         </Content>
       )}
     </Container>

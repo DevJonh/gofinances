@@ -21,6 +21,7 @@ import {
   Fields,
   TransactionsType,
 } from "./styles";
+import { useAuth } from "../../hooks/auth";
 
 interface FormData {
   name: string;
@@ -44,6 +45,7 @@ export const Register = () => {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
   const { dispatch } = useNavigation();
+  const { user } = useAuth();
 
   const {
     control,
@@ -78,7 +80,7 @@ export const Register = () => {
     };
 
     try {
-      const dataKey = "@gofinances:transactions";
+      const dataKey = `@gofinances:transactions_user:${user.id}`;
       const transaction = await AsyncStorage.getItem(dataKey);
       const currentTransaction = transaction ? JSON.parse(transaction) : [];
 
